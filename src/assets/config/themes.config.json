@@ -1,0 +1,18 @@
+{
+    "light": {
+        "primary": "#2d5128",
+        "secondary": "#d5eb7b",
+        "accent": "#8da750",
+        "accentLight": "#f2eeca",
+        "light": "#e4eb9c",
+        "dark": "#142c14"
+    },
+    "dark": {
+        "primary": "#0e361c",
+        "secondary": "#7c9060",
+        "accent": "#446c48",
+        "accentLight": "#9fbc8d",
+        "light": "#c6caab",
+        "dark": "#042514"
+    }
+}

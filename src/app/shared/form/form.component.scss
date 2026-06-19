@@ -1,0 +1,49 @@
+.radio {
+    width: 15px;
+    height: 15px;
+    background-color: var(--white);
+    border-radius: 100%;
+    margin-top: 0.15rem;
+    border: 2px solid var(--accent);
+}
+
+.checkbox {
+    width: 15px;
+    height: 15px;
+    background-color: var(--white);
+    margin-top: 0.15rem;
+    border: 2px solid var(--accent);
+    position: relative;
+
+    span {
+        color: var(--white);
+        position: absolute;
+        bottom: -0.2rem;
+        left: 0.1rem;
+    }
+}
+
+.selected {
+    .radio, .checkbox {
+        background-color: var(--accent);
+    }
+}
+
+.radioCheckElement {
+    display: flex;
+    gap: 0.5rem;
+    align-items: start;
+    cursor: pointer;
+    width: fit-content;
+
+    span {
+        width: calc(100% - 20px);
+    }
+}
+
+.color-input {
+    margin: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

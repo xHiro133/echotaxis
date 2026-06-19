@@ -1,0 +1,71 @@
+@if (form) {
+    <div>
+        @for (control of form.controls; track control) {
+            @if (control.type === getControlType().TITLE) {
+                <div>{{ control.selector | translate }}</div>
+            }
+
+            @if (control.type === getControlType().TEXT) {
+                <input #textInput (change)="updateValue(control, textInput)" (input)="updateValue(control, textInput)" type="text" [required]="control.required" [id]="control.selector" [placeholder]="(control.placeholder || '') | translate" [value]="control.defaultValue || control.value || ''">
+            }
+
+            @if (control.type === getControlType().PASSWORD) {
+                <input #passwordInput (change)="updateValue(control, passwordInput)" type="password" [required]="control.required" [id]="control.selector" [placeholder]="(control.placeholder || '') | translate">
+            }
+
+            @if (control.type === getControlType().EMAIL) {
+                <input #emailInput (change)="updateValue(control, emailInput)" type="email" [required]="control.required" [id]="control.selector" [placeholder]="(control.placeholder || '') | translate">
+            }
+
+            @if (control.type === getControlType().RADIO) {
+                <div>
+                    <input #radioInput type="hidden" [required]="control.required" [id]="control.selector" [value]="control.defaultValue || control.value || ''">
+                    @for (option of control.options; track option) {
+                        <div (click)="radioInput.value = toggleRadio(control, option.value); updateValue(control, radioInput)" class="radioCheckElement" [class.selected]="control.value === option.value">
+                            <ng-container *ngTemplateOutlet="radioTemplate"></ng-container>
+                            <span>{{ option.label | translate }}</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (control.type === getControlType().CHECKBOX) {
+                <div>
+                    <input #checkboxInput type="hidden" [required]="control.required" [id]="control.selector" [value]="control.defaultValue || control.value || ''">
+                    @for (option of control.options; track option) {
+                        <div (click)="checkboxInput.value = toggleCheckbox(option.value); updateValue(control, checkboxInput)" class="radioCheckElement" [class.selected]="checkboxSelected(option.value, control)">
+                            <ng-container *ngTemplateOutlet="checkboxTemplate; context: { selected: checkboxSelected(option.value, control) }"></ng-container>
+                            <span>{{ option.label | translate }}</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (control.type === getControlType().COLOR) {
+                <div class="color-input">
+                    <input #colorInput (change)="updateValue(control, colorInput)" type="color" [required]="control.required" [id]="control.selector" [placeholder]="(control.placeholder || '') | translate" [value]="control.defaultValue || control.value || ''">
+                    
+                    @if (control.label) {
+                        <span>{{ control.label | translate }}</span>
+                    }
+                </div>
+            }
+
+            @if (control.type === getControlType().SPACER) {
+                <div><br></div>
+            }
+        }
+    </div>
+}
+
+<ng-template #radioTemplate>
+    <div class="radio"></div>
+</ng-template>
+
+<ng-template #checkboxTemplate let-selected="selected">
+    <div class="checkbox">
+        @if (selected) {
+            <span>x</span>
+        }
+    </div>
+</ng-template>

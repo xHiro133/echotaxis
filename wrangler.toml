@@ -1,0 +1,6 @@
+name = "echotaxis"
+compatibility_date = "2026-03-04"
+
+[assets]
+directory = "./dist/echotaxis/browser"
+not_found_handling = "single-page-application"
