@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from "@angular/core";
 
 @Component({
     selector: 'my-track',
@@ -27,31 +27,20 @@ export class TrackComponent implements AfterViewInit {
     drawingBar: any;
 
     currentFile?: File;
+    channelData?: Float32Array<ArrayBuffer>;
+
+    maxHeight = 0;
+
+    private _canvas?: HTMLCanvasElement;
+    private _hiddenCanvas?: HTMLCanvasElement;
 
     private _canvasContext?: CanvasRenderingContext2D;
+    private _hiddenContext?: CanvasRenderingContext2D;
 
     constructor() {}
 
     ngAfterViewInit(): void {
-        this.trackWidth = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('width'));
-        this.trackHeight = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('height'));
-
-        const width = this.trackWidth;
-        const height = this.trackHeight;
-
-        const canvas = this.trackCanvas?.nativeElement as HTMLCanvasElement;
-        const hiddenCanvas = this.hiddenCanvas?.nativeElement as HTMLCanvasElement;
-
-        this._canvasContext = canvas.getContext('2d')!;
-        const hiddenCtx = hiddenCanvas.getContext('2d')!;
-
-        canvas.width = width;
-        canvas.height = height;
-
-        hiddenCanvas.width = width;
-        hiddenCanvas.height = height;
-
-        this._clearCanvas();
+        this._setupCanvas();
 
         (this.audioFile?.nativeElement as HTMLInputElement)?.addEventListener('change', async (event) => {
             const file = (event.target as HTMLInputElement)?.files?.[0];
@@ -74,28 +63,67 @@ export class TrackComponent implements AfterViewInit {
             const arrayBuffer = await file.arrayBuffer();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-            const channelData = audioBuffer.getChannelData(0);
+            this.channelData = audioBuffer.getChannelData(0);
 
-            this.fileSelected.emit({ file, data: channelData });
+            this.fileSelected.emit({ file, data: this.channelData });
 
-            const reduced = this._downSample(channelData).filter(r => !!r);
-
-            const max = Math.max(...reduced.map(d => Math.abs(d)));
-            const maxRatio = height / max;
-
-            for (let i = 0; i < reduced.length; i++) {
-                const canvasValue = Math.abs(reduced[i]) * maxRatio;
-                this._drawSegment(i, (height - canvasValue) / 2, 1, canvasValue);
-            }
-
-            hiddenCtx.drawImage(canvas, 0, 0);
-
-            // Draw bar
-            this.drawingBar = setInterval(() => {
-                this._resetCanvas();
-                this._drawSegment(this._timeToTrack(this.audio.currentTime), 0, 1, max * maxRatio, '#ff0000');
-            }, 1 / 15);
+            this._drawCanvas();
         });
+    }
+
+    private _setupCanvas() {
+        this.trackWidth = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('width'));
+        this.trackHeight = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('height'));
+
+        const width = this.trackWidth;
+        const height = this.trackHeight;
+
+        this._canvas = this.trackCanvas?.nativeElement as HTMLCanvasElement;
+        this._hiddenCanvas = this.hiddenCanvas?.nativeElement as HTMLCanvasElement;
+
+        this._canvasContext = this._canvas.getContext('2d')!;
+        this._hiddenContext = this._hiddenCanvas.getContext('2d')!;
+
+        this._canvas.width = width;
+        this._canvas.height = height;
+
+        this._hiddenCanvas.width = width;
+        this._hiddenCanvas.height = height;
+
+        this._clearCanvas();
+    }
+
+    private _drawCanvas() {
+        const reduced = this._downSample(this.channelData!).filter(r => !!r);
+
+        const max = Math.max(...reduced.map(d => Math.abs(d)));
+        const maxRatio = this._getTrackHeight() / max;
+
+        this.maxHeight = max * maxRatio;
+
+        for (let i = 0; i < reduced.length; i++) {
+            const canvasValue = Math.abs(reduced[i]) * maxRatio;
+            this._drawSegment(i, (this._getTrackHeight() - canvasValue) / 2, 1, canvasValue);
+        }
+
+        this._hiddenContext?.drawImage(this._canvas!, 0, 0);
+
+        this._startDrawingBar();
+    }
+
+    @HostListener('window:resize', [])
+    onResize() {
+        this._setupCanvas();
+        this._drawCanvas();
+    }
+
+    private _startDrawingBar() {
+        clearInterval(this.drawingBar);
+
+        this.drawingBar = setInterval(() => {
+            this._resetCanvas();
+            this._drawSegment(this._timeToTrack(this.audio.currentTime), 0, 1, this.maxHeight, '#ff0000');
+        }, 1 / 15);
     }
 
     isTrackPlaying() {
@@ -108,11 +136,19 @@ export class TrackComponent implements AfterViewInit {
     }
 
     private _timeToTrack(time: number) {
-        return time * (this.trackWidth || 1) / this.audio.duration;
+        return time * this._getTrackWidth() / this.audio.duration;
     }
 
     private _trackToTime(track: number) {
-        return track * this.audio.duration / (this.trackWidth || 1);
+        return track * this.audio.duration / this._getTrackWidth();
+    }
+
+    private _getTrackWidth() {
+        return this.trackWidth || 1;
+    }
+
+    private _getTrackHeight() {
+        return this.trackHeight || 1;
     }
 
     toggleAudio() {
