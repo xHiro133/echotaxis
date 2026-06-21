@@ -71,6 +71,29 @@ export class TrackComponent implements AfterViewInit {
         });
     }
 
+    deleteFile() {
+        this.currentFile = undefined;
+        this.stopAudio();
+        this._stopDrawingBar();
+        this._clearCanvas();
+    }
+
+    toggleMute() {
+        this.audio.muted = !this.audio.muted;
+    }
+
+    isMuted() {
+        return this.audio.muted;
+    }
+
+    currentVolume() {
+        return this.audio.volume * 100;
+    }
+
+    setVolume(event: Event) {
+        this.audio.volume = (+((event.target as HTMLInputElement)?.value || 1) / 100);
+    }
+
     private _setupCanvas() {
         this.trackWidth = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('width'));
         this.trackHeight = this._pixelToNumber(getComputedStyle(this.trackCanvas?.nativeElement).getPropertyValue('height'));
@@ -118,12 +141,16 @@ export class TrackComponent implements AfterViewInit {
     }
 
     private _startDrawingBar() {
-        clearInterval(this.drawingBar);
+        this._stopDrawingBar();
 
         this.drawingBar = setInterval(() => {
             this._resetCanvas();
             this._drawSegment(this._timeToTrack(this.audio.currentTime), 0, 1, this.maxHeight, '#ff0000');
         }, 1 / 15);
+    }
+
+    private _stopDrawingBar() {
+        clearInterval(this.drawingBar);
     }
 
     isTrackPlaying() {
@@ -204,8 +231,12 @@ export class TrackComponent implements AfterViewInit {
     }
 
     private _downSample(channelData: Float32Array<ArrayBuffer>, targetSize = this.trackWidth) {
+        if (!channelData) {
+            return [];
+        }
+
         const result = [];
-        const blockSize = channelData.length / (targetSize || 1);
+        const blockSize = (channelData?.length || 1) / (targetSize || 1);
 
         for (let i = 0; i < (targetSize || 0); i++) {
             const start = Math.floor(i * blockSize);
