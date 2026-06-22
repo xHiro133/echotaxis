@@ -61,3 +61,24 @@ html, body {
     font-family: "Cascadia Mono", sans-serif;
     font-optical-sizing: auto;;
 }
+
+button {
+    background-color: var(--accent);
+    color: var(--white);
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    padding: 0 1.5rem;
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    font-weight: bold;
+
+    &:hover, &[disabled] {
+        background-color: var(--primary);
+        border: 2px solid var(--primary);
+    }
+
+    &[disabled] {
+        cursor: alias;
+    }
+}

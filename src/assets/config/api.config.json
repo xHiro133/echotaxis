@@ -1,3 +1,4 @@
 [
-    { "selector": "example", "url": "/test/{id}?section=[section]", "method": "GET" }
+    { "selector": "example", "url": "/test/{id}?section=[section]", "method": "GET" },
+    { "selector": "sendTracksData", "url": "/api/tracks", "method": "POST" }
 ]

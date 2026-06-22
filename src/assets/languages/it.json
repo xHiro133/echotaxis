@@ -1,5 +1,6 @@
 {
     "home": {
-        "globalVolume": "Volume globale"
+        "globalVolume": "Volume globale",
+        "generate": "Genera nuova traccia"
     }
 }

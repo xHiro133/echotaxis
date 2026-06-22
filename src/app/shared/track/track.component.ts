@@ -14,7 +14,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @ViewChild('hiddenCanvas') hiddenCanvas?: ElementRef;
     @ViewChild('audioFile') audioFile?: ElementRef;
 
-    @Output() fileSelected: EventEmitter<{ file: File; data: Float32Array<ArrayBuffer> }> = new EventEmitter();
+    @Output() fileSelected: EventEmitter<File> = new EventEmitter();
     @Output() audioPlayed: EventEmitter<void> = new EventEmitter();
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
 
@@ -22,6 +22,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Input() pausePlayer?: EventEmitter<void>;
     @Input() readonly = false;
     @Input() inputVolume = 100;
+    @Input() fileInput?: EventEmitter<File>;
 
     trackWidth?: number;
     trackHeight?: number;
@@ -55,28 +56,40 @@ export class TrackComponent implements AfterViewInit, OnChanges {
                 return;
             }
 
-            this.currentFile = file;
-
-            const url = URL.createObjectURL(file);
-            this.audio.src = url;
-
-            this.audio.volume = this.inputVolume / 100;
-
-            this.pausePlayer?.subscribe(() => {
-                this.audio.pause();
-            });
-
-            const audioContext = new AudioContext();
-
-            const arrayBuffer = await file.arrayBuffer();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-            this.channelData = audioBuffer.getChannelData(0);
-
-            this.fileSelected.emit({ file, data: this.channelData });
-
-            this._drawCanvas();
+            this._manageFile(file);
         });
+
+        this.fileInput?.subscribe((file) => {
+            this._manageFile(file);
+        });
+
+        if (this.currentFile) {
+            this._manageFile(this.currentFile);
+        }
+    }
+
+    private async _manageFile(file: File) {
+        this.currentFile = file;
+
+        const url = URL.createObjectURL(file);
+        this.audio.src = url;
+
+        this.audio.volume = this.inputVolume / 100;
+
+        this.pausePlayer?.subscribe(() => {
+            this.audio.pause();
+        });
+
+        const audioContext = new AudioContext();
+
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        this.channelData = audioBuffer.getChannelData(0);
+
+        this.fileSelected.emit(file);
+
+        this._drawCanvas();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -91,6 +104,22 @@ export class TrackComponent implements AfterViewInit, OnChanges {
         this.stopAudio();
         this._stopDrawingBar();
         this._clearCanvas();
+    }
+
+    downloadFile() {
+        if (!this.currentFile) {
+            return;
+        }
+
+        const url = URL.createObjectURL(this.currentFile);
+
+        const a = document.createElement('a');
+
+        a.href = url;
+        a.download = this.currentFile.name;
+        a.click();
+
+        URL.revokeObjectURL(url);
     }
 
     toggleMute() {

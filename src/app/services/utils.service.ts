@@ -29,4 +29,22 @@ export class UtilsService {
         return 's' + number.toString().split('.')[1];
     }
 
+    base64ToBlob(base64: string, mime: string) {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+
+        return new Blob([byteArray], { type: mime });
+    }
+
+    fileDataToFile(fileData: { data64: string, name: string, type: string }) {
+        const blob = this.base64ToBlob(fileData.data64, fileData.type);
+        return new File([blob], fileData.name, { type: fileData.type });
+    }
+
 }
