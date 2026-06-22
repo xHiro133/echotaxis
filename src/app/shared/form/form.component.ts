@@ -13,6 +13,7 @@ import { TranslatePipe } from "../../pipes/translate.pipe";
 export class FormComponent implements AfterViewInit, OnInit {
 
     @Input('form') form?: MyForm;
+    @Input('inline') inline = false;
 
     @Output() formChanged: EventEmitter<MyForm> = new EventEmitter();
 

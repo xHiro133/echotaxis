@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { SliderComponent } from "../slider/slider.component";
 
 @Component({
@@ -8,7 +8,7 @@ import { SliderComponent } from "../slider/slider.component";
     standalone: true,
     imports: [SliderComponent]
 })
-export class TrackComponent implements AfterViewInit {
+export class TrackComponent implements AfterViewInit, OnChanges {
 
     @ViewChild('trackCanvas') trackCanvas?: ElementRef;
     @ViewChild('hiddenCanvas') hiddenCanvas?: ElementRef;
@@ -16,10 +16,12 @@ export class TrackComponent implements AfterViewInit {
 
     @Output() fileSelected: EventEmitter<{ file: File; data: Float32Array<ArrayBuffer> }> = new EventEmitter();
     @Output() audioPlayed: EventEmitter<void> = new EventEmitter();
+    @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
 
     @Input() color: 'blue' | 'yellow' | 'green' = 'blue';
     @Input() pausePlayer?: EventEmitter<void>;
     @Input() readonly = false;
+    @Input() inputVolume = 100;
 
     trackWidth?: number;
     trackHeight?: number;
@@ -32,6 +34,8 @@ export class TrackComponent implements AfterViewInit {
     channelData?: Float32Array<ArrayBuffer>;
 
     maxHeight = 0;
+
+    triggerSliderChange: EventEmitter<number> = new EventEmitter();
 
     private _canvas?: HTMLCanvasElement;
     private _hiddenCanvas?: HTMLCanvasElement;
@@ -56,6 +60,8 @@ export class TrackComponent implements AfterViewInit {
             const url = URL.createObjectURL(file);
             this.audio.src = url;
 
+            this.audio.volume = this.inputVolume / 100;
+
             this.pausePlayer?.subscribe(() => {
                 this.audio.pause();
             });
@@ -71,6 +77,13 @@ export class TrackComponent implements AfterViewInit {
 
             this._drawCanvas();
         });
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['inputVolume']) {
+            this.setVolume(changes['inputVolume'].currentValue);
+            this.triggerSliderChange.emit(changes['inputVolume'].currentValue);
+        }
     }
 
     deleteFile() {
@@ -98,6 +111,8 @@ export class TrackComponent implements AfterViewInit {
         } else {
             this.audio.volume = (+((event.target as HTMLInputElement)?.value || 1) / 100);
         }
+
+        this.volumeChanged.emit(this.audio.volume * 100);
     }
 
     private _setupCanvas() {

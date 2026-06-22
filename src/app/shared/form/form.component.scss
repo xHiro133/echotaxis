@@ -1,3 +1,8 @@
+.my-form.inline {
+    display: flex;
+    align-items: center;
+}
+
 .radio {
     width: 15px;
     height: 15px;
@@ -13,14 +18,9 @@
     background-color: var(--white);
     margin-top: 0.15rem;
     border: 2px solid var(--accent);
-    position: relative;
-
-    span {
-        color: var(--white);
-        position: absolute;
-        bottom: -0.2rem;
-        left: 0.1rem;
-    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .selected {

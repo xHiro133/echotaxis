@@ -15,6 +15,8 @@ export class SliderComponent implements AfterViewInit {
     @Input() min = 1;
     @Input() max = 100;
 
+    @Input() triggerSliderChange: EventEmitter<number> = new EventEmitter();
+
     @Output() changedValue: EventEmitter<number> = new EventEmitter();
 
     adjustedValue = this.max;
@@ -32,6 +34,11 @@ export class SliderComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this._moveSlider();
+
+        this.triggerSliderChange.subscribe((value: number) => {
+            this.adjustedValue = value;
+            this._moveSlider();
+        });
     }
 
     toggleTracking() {
@@ -51,13 +58,7 @@ export class SliderComponent implements AfterViewInit {
             return;
         }
 
-        const width = +(getComputedStyle(this.slider?.nativeElement).getPropertyValue('width')?.split('p')[0]);
-
-        const adjustedMax = this.max - (this.min - 1);
-        const x = event.pageX - (this.slider?.nativeElement as HTMLDivElement)?.offsetLeft;
-        const value = adjustedMax * x / width;
-
-        this.adjustedValue = value + (this.min - 1);
+        this.adjustedValue = this._getAdjustedValue(event.pageX);
 
         if (this.adjustedValue < this.min) {
             this.adjustedValue = this.min;
@@ -74,6 +75,16 @@ export class SliderComponent implements AfterViewInit {
         this._moveSlider();
 
         this.changedValue.emit(this.adjustedValue);
+    }
+
+    private _getAdjustedValue(pageX: number) {
+        const width = +(getComputedStyle(this.slider?.nativeElement).getPropertyValue('width')?.split('p')[0]);
+
+        const adjustedMax = this.max - (this.min - 1);
+        const x = pageX - (this.slider?.nativeElement as HTMLDivElement)?.offsetLeft;
+        const value = adjustedMax * x / width;
+
+        return value + (this.min - 1);
     }
 
     private _moveSlider() {
