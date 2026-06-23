@@ -1,4 +1,4 @@
-import { Component, EventEmitter } from "@angular/core";
+import { Component, EventEmitter, HostListener } from "@angular/core";
 import { TrackComponent } from "../../shared/track/track.component";
 import { ControlType, MyForm } from "../../models/form.model";
 import { FormComponent } from "../../shared/form/form.component";
@@ -16,9 +16,9 @@ import { UtilsService } from "../../services/utils.service";
 })
 export class HomeComponent {
 
-    pauseGuide = new EventEmitter<void>();
-    pauseDub = new EventEmitter<void>();
-    pauseResult = new EventEmitter<void>();
+    actionGuide = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
+    actionDub = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
+    actionResult = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
 
     setResult = new EventEmitter<File>();
 
@@ -35,7 +35,108 @@ export class HomeComponent {
         dub?: File
     } = {};
 
+    lastTrack?: 'guide' | 'dub' | 'result';
+
     constructor(private _tracksService: TracksService, private _loaderService: LoaderService, private _utilsService: UtilsService) {}
+
+    @HostListener('window:keydown', ['$event'])
+    toggleTrack(event: KeyboardEvent) {
+        event.preventDefault();
+
+        if (event.key === ' ') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('toggle');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('toggle');
+                    break;
+                case 'result':
+                    this.actionResult.emit('toggle');
+                    break;
+            }
+        }
+
+        if (event.key === '1') {
+            this.lastTrack = 'guide';
+        }
+        if (event.key === '2') {
+            this.lastTrack = 'dub';
+        }
+        if (event.key === '3') {
+            this.lastTrack = 'result';
+        }
+
+        if (event.key === 's') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('stop');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('stop');
+                    break;
+                case 'result':
+                    this.actionResult.emit('stop');
+                    break;
+            }
+        }
+
+        if (event.key === 'm') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('mute');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('mute');
+                    break;
+                case 'result':
+                    this.actionResult.emit('mute');
+                    break;
+            }
+        }
+
+        if (event.key === 'd') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('action');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('action');
+                    break;
+                case 'result':
+                    this.actionResult.emit('action');
+                    break;
+            }
+        }
+
+        if (event.key === 'ArrowRight') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('skip');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('skip');
+                    break;
+                case 'result':
+                    this.actionResult.emit('skip');
+                    break;
+            }
+        }
+
+        if (event.key === 'ArrowLeft') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit('rewind');
+                    break;
+                case 'dub':
+                    this.actionDub.emit('rewind');
+                    break;
+                case 'result':
+                    this.actionResult.emit('rewind');
+                    break;
+            }
+        }
+    }
 
     canGenerate() {
         return !!this.tracksData.guide && !!this.tracksData.dub;
@@ -55,6 +156,8 @@ export class HomeComponent {
                 const file = this._utilsService.fileDataToFile(result.fileData);
 
                 this.setResult.emit(file);
+                
+                this.lastTrack = 'result';
             },
             error: (err) => {
                 this._loaderService.hide();
@@ -78,6 +181,7 @@ export class HomeComponent {
 
     saveTrackData(track: 'guide' | 'dub', file: File) {
         this.tracksData[track] = file;
+        this.lastTrack = track;
     }
 
     setGlobalVolume(volume: number) {
@@ -87,18 +191,20 @@ export class HomeComponent {
     }
 
     played(track: 'guide' | 'dub' | 'result') {
+        this.lastTrack = track;
+
         switch (track) {
             case 'guide':
-                this.pauseDub.emit();
-                this.pauseResult.emit();
+                this.actionDub.emit('off');
+                this.actionResult.emit('off');
                 break;
             case 'dub':
-                this.pauseGuide.emit();
-                this.pauseResult.emit();
+                this.actionGuide.emit('off');
+                this.actionResult.emit('off');
                 break;
             case 'result':
-                this.pauseGuide.emit();
-                this.pauseDub.emit();
+                this.actionGuide.emit('off');
+                this.actionDub.emit('off');
                 break;
         }
     }

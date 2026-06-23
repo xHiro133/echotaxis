@@ -1,11 +1,11 @@
 <div class="track">
-    <my-track [color]="'blue'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [pausePlayer]="pauseGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)"></my-track>
+    <my-track [color]="'blue'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)"></my-track>
 </div>
 <div class="track">
-    <my-track [color]="'yellow'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [pausePlayer]="pauseDub" (audioPlayed)="played('dub')" (fileSelected)="saveTrackData('dub', $event)"></my-track>
+    <my-track [color]="'yellow'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionDub" (audioPlayed)="played('dub')" (fileSelected)="saveTrackData('dub', $event)"></my-track>
 </div>
 <div class="track">
-    <my-track [color]="'green'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [pausePlayer]="pauseResult" (audioPlayed)="played('result')" [readonly]="true" [fileInput]="setResult"></my-track>
+    <my-track [color]="'green'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionResult" (audioPlayed)="played('result')" [readonly]="true" [fileInput]="setResult"></my-track>
 </div>
 
 <div class="manager">

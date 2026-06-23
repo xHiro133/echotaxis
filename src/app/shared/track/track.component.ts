@@ -19,7 +19,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
 
     @Input() color: 'blue' | 'yellow' | 'green' = 'blue';
-    @Input() pausePlayer?: EventEmitter<void>;
+    @Input() setPlayer?: EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>;
     @Input() readonly = false;
     @Input() inputVolume = 100;
     @Input() fileInput?: EventEmitter<File>;
@@ -76,8 +76,45 @@ export class TrackComponent implements AfterViewInit, OnChanges {
 
         this.audio.volume = this.inputVolume / 100;
 
-        this.pausePlayer?.subscribe(() => {
-            this.audio.pause();
+        this.setPlayer?.subscribe((action) => {
+            if (!this.currentFile) {
+                return;
+            }
+
+            switch(action) {
+                case 'off':
+                    this.audio.pause();
+                    break;
+                case 'on':
+                    if (this.audio.currentTime >= this.audio.duration) {
+                        this.audio.currentTime = 0;
+                    }
+
+                    this.audio.play();
+                    break;
+                case 'toggle':
+                    this.toggleAudio();
+                    break;
+                case 'stop':
+                    this.stopAudio();
+                    break;
+                case 'mute':
+                    this.toggleMute();
+                    break;
+                case 'action':
+                    if (this.readonly) {
+                        this.downloadFile();
+                    } else {
+                        this.deleteFile();
+                    }
+                    break;
+                case 'skip':
+                    this.skipTrack();
+                    break;
+                case 'rewind':
+                    this.rewindTrack();
+                    break;
+            }
         });
 
         const audioContext = new AudioContext();
@@ -120,6 +157,14 @@ export class TrackComponent implements AfterViewInit, OnChanges {
         a.click();
 
         URL.revokeObjectURL(url);
+    }
+
+    skipTrack(time = 5) {
+        this.audio.currentTime += time;
+    }
+
+    rewindTrack(time = 5) {
+        this.audio.currentTime -= time;
     }
 
     toggleMute() {
@@ -234,6 +279,10 @@ export class TrackComponent implements AfterViewInit, OnChanges {
         }
 
         if (this.audio.paused) {
+            if (this.audio.currentTime >= this.audio.duration) {
+                this.audio.currentTime = 0;
+            }
+
             this.audio.play();
             this.audioPlayed.next();
         } else {
