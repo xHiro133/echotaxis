@@ -31,8 +31,8 @@ export class HomeComponent {
     };
 
     tracksData: {
-        guide?: File,
-        dub?: File
+        guide?: { file: File, sampleRate: number },
+        dub?: { file: File, sampleRate: number }
     } = {};
 
     lastTrack?: 'guide' | 'dub' | 'result';
@@ -149,7 +149,10 @@ export class HomeComponent {
 
         this._loaderService.show();
 
-        this._tracksService.sendTracks(this.tracksData as { guide: File, dub: File }).subscribe({
+        const body = { guide: this.tracksData.guide!.file, dub: this.tracksData.dub!.file };
+        const sampleRates = { guide: this.tracksData.guide!.sampleRate, dub: this.tracksData.dub!.sampleRate };
+
+        this._tracksService.sendTracks(body, sampleRates).subscribe({
             next: (result) => {
                 this._loaderService.hide();
 
@@ -179,8 +182,8 @@ export class HomeComponent {
         localStorage.setItem('formValue', JSON.stringify(this.form.value));
     }
 
-    saveTrackData(track: 'guide' | 'dub', file: File) {
-        this.tracksData[track] = file;
+    saveTrackData(track: 'guide' | 'dub', data: { file: File, sampleRate: number }) {
+        this.tracksData[track] = { file: data.file, sampleRate: data.sampleRate };
         this.lastTrack = track;
     }
 

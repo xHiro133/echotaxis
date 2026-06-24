@@ -14,7 +14,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @ViewChild('hiddenCanvas') hiddenCanvas?: ElementRef;
     @ViewChild('audioFile') audioFile?: ElementRef;
 
-    @Output() fileSelected: EventEmitter<File> = new EventEmitter();
+    @Output() fileSelected: EventEmitter<{ file: File, sampleRate: number }> = new EventEmitter();
     @Output() audioPlayed: EventEmitter<void> = new EventEmitter();
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
 
@@ -124,7 +124,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
 
         this.channelData = audioBuffer.getChannelData(0);
 
-        this.fileSelected.emit(file);
+        this.fileSelected.emit({ file, sampleRate: audioContext.sampleRate });
 
         this._drawCanvas();
     }
