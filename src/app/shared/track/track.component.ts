@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { SliderComponent } from "../slider/slider.component";
 import { TrackActions } from "../../models/track.model";
+import { UtilsService } from "../../services/utils.service";
 
 @Component({
     selector: 'my-track',
@@ -18,14 +19,16 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Output() fileSelected: EventEmitter<{ file: File, sampleRate: number }> = new EventEmitter();
     @Output() audioPlayed: EventEmitter<void> = new EventEmitter();
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
+    @Output() sizesCalculated: EventEmitter<{ blockSize: number; fileSize: number }> = new EventEmitter();
 
     @Input() color: 'blue' | 'yellow' | 'green' = 'blue';
     @Input() setPlayer?: EventEmitter<TrackActions>;
     @Input() readonly = false;
-    @Input() inputVolume = 100;
+    @Input() inputVolume = +(localStorage.getItem(this.color + 'Volume') || 100);
     @Input() fileInput?: EventEmitter<File>;
     @Input() active?: boolean;
     @Input() redraw?: EventEmitter<void>;
+    @Input() enforcedSize?: { blockSize: number; fileSize: number };
 
     trackWidth?: number;
     trackHeight?: number;
@@ -47,7 +50,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     private _canvasContext?: CanvasRenderingContext2D;
     private _hiddenContext?: CanvasRenderingContext2D;
 
-    constructor() {}
+    constructor(private _utilsService: UtilsService) {}
 
     ngAfterViewInit(): void {
         this._setupCanvas();
@@ -69,10 +72,20 @@ export class TrackComponent implements AfterViewInit, OnChanges {
             }
 
             this._manageFile(file);
+
+            setTimeout(() => {
+                this.setVolume(this.inputVolume);
+                this.triggerSliderChange.emit(this.inputVolume);
+            }, 100);
         });
 
         this.fileInput?.subscribe((file) => {
             this._manageFile(file);
+
+            setTimeout(() => {
+                this.setVolume(this.inputVolume);
+                this.triggerSliderChange.emit(this.inputVolume);
+            }, 100);
         });
 
         if (this.currentFile) {
@@ -83,7 +96,13 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     private async _manageFile(file: File) {
         this.currentFile = file;
 
-        const url = URL.createObjectURL(file);
+        const fileCopy = file;
+        const fileSize = this.enforcedSize?.fileSize;
+
+        const cutBlob = fileCopy.slice(0, fileSize);
+        const fileToPlay = new File([cutBlob], fileCopy.name, { type: fileCopy.type });
+
+        const url = URL.createObjectURL(fileSize ? fileToPlay : file);
         this.audio.src = url;
 
         this.audio.volume = this.inputVolume / 100;
@@ -92,6 +111,8 @@ export class TrackComponent implements AfterViewInit, OnChanges {
             if (!this.currentFile) {
                 return;
             }
+
+            this._redrawCanvas();
 
             switch(action) {
                 case TrackActions.OFF:
@@ -202,7 +223,11 @@ export class TrackComponent implements AfterViewInit, OnChanges {
             this.audio.volume = (+((event.target as HTMLInputElement)?.value || 1) / 100);
         }
 
-        this.volumeChanged.emit(this.audio.volume * 100);
+        const volume = this.audio.volume * 100;
+
+        localStorage.setItem(this.color + 'Volume', volume.toString());
+
+        this.volumeChanged.emit(volume);
     }
 
     private _setupCanvas() {
@@ -355,7 +380,9 @@ export class TrackComponent implements AfterViewInit, OnChanges {
         }
 
         const result = [];
-        const blockSize = (channelData?.length || 1) / (targetSize || 1);
+        const blockSize = this.enforcedSize?.blockSize || (channelData?.length || 1) / (targetSize || 1);
+
+        this.sizesCalculated.emit({ blockSize, fileSize: this.currentFile?.size || 0 });
 
         for (let i = 0; i < (targetSize || 0); i++) {
             const start = Math.floor(i * blockSize);

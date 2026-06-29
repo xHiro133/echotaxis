@@ -6,7 +6,7 @@ import { TranslatePipe } from "../../pipes/translate.pipe";
 import { TracksService } from "../../services/tracks.service";
 import { LoaderService } from "../../services/loader.service";
 import { UtilsService } from "../../services/utils.service";
-import { TrackActions } from "../../models/track.model";
+import { Algorithms, TrackActions } from "../../models/track.model";
 
 @Component({
     selector: 'my-home',
@@ -24,7 +24,7 @@ export class HomeComponent {
 
     setOutput = new EventEmitter<File>();
 
-    globalVolume = 100;
+    globalVolume = +(localStorage.getItem('blueVolume') || 100);
 
     form: MyForm = {
         controls: [
@@ -39,6 +39,8 @@ export class HomeComponent {
     } = {};
 
     lastTrack?: 'guide' | 'dub' | 'output';
+
+    sizeForResult?: { blockSize: number; fileSize: number };
 
     constructor(private _tracksService: TracksService, private _loaderService: LoaderService, private _utilsService: UtilsService) {}
 
@@ -155,6 +157,10 @@ export class HomeComponent {
         }
     }
 
+    setSizeForResult(sizes: { blockSize: number; fileSize: number }) {
+        this.sizeForResult = sizes;
+    }
+
     canGenerate() {
         return !!this.tracksData.guide && !!this.tracksData.dub;
     }
@@ -173,7 +179,7 @@ export class HomeComponent {
         const body = { guide: this.tracksData.guide!.file, dub: this.tracksData.dub!.file };
         const sampleRates = { guide: this.tracksData.guide!.sampleRate, dub: this.tracksData.dub!.sampleRate };
 
-        this._tracksService.sendTracks(body, sampleRates).subscribe({
+        this._tracksService.sendTracks(body, sampleRates, Algorithms.WSOLA).subscribe({
             next: (res) => {
                 this._loaderService.hide();
 

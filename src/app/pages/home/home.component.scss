@@ -4,10 +4,11 @@
 
 .main {
     display: flex;
-    height: 100%;
+        flex-direction: column;
+        height: 100%;
 
     .tracks {
-        width: 70%;
+        width: 100%;
 
         .track {
             display: flex;
@@ -39,46 +40,15 @@
     }
 
     .manager {
-        width: 30%;
-        height: 100%;
+        width: 100%;
+        height: auto;
+        flex: 1;
         padding: 0.5rem 0.5rem;
         display: flex;
         justify-content: start;
         align-items: start;
-        flex-direction: column;
-        gap: 1rem;
+        flex-direction: row;
+        gap: 2rem;
         background-color: var(--secondary);
-
-        button {
-            width: 100% !important;
-        }
-    }
-}
-
-@media screen and (max-width: 1350px) {
-    .main {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-
-        .tracks {
-            width: 100%;
-        }
-
-        .manager {
-            width: 100%;
-            height: auto;
-            flex: 1;
-            padding: 0.5rem 0.5rem;
-            display: flex;
-            justify-content: start;
-            align-items: start;
-            flex-direction: row;
-            gap: 2rem;
-
-            button {
-                width: auto !important;
-            }
-        }
     }
 }

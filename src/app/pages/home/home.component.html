@@ -2,7 +2,7 @@
     <div class="tracks">
         <div class="track">
             <!-- <div class="dot" [class.blue]="lastTrack === 'guide'"></div> -->
-            <my-track [color]="'blue'" [active]="lastTrack === 'guide'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)"></my-track>
+            <my-track [color]="'blue'" [active]="lastTrack === 'guide'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)" (sizesCalculated)="setSizeForResult($event)"></my-track>
         </div>
         <div class="track">
             <!-- <div class="dot" [class.yellow]="lastTrack === 'dub'"></div> -->
@@ -10,7 +10,7 @@
         </div>
         <div class="track">
             <!-- <div class="dot" [class.green]="lastTrack === 'output'"></div> -->
-            <my-track [color]="'green'" [active]="lastTrack === 'output'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionOutput" (audioPlayed)="played('output')" (fileSelected)="saveTrackData('output', $event)" [readonly]="true" [fileInput]="setOutput"></my-track>
+            <my-track [color]="'green'" [active]="lastTrack === 'output'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionOutput" (audioPlayed)="played('output')" (fileSelected)="saveTrackData('output', $event)" [readonly]="true" [fileInput]="setOutput" [enforcedSize]="sizeForResult"></my-track>
         </div>
     </div>
     

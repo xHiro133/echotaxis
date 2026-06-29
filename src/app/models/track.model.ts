@@ -9,3 +9,7 @@ export enum TrackActions {
     REWIND,
     TEST
 }
+
+export enum Algorithms {
+    WSOLA
+}
