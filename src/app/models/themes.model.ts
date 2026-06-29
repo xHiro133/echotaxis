@@ -7,7 +7,7 @@ export interface Theme {
     primary: string;
     secondary: string;
     accent: string;
-    accentLight: string;
+    "accent-dark": string;
     light: string;
     dark: string;
     background: string;

@@ -6,6 +6,7 @@ import { TranslatePipe } from "../../pipes/translate.pipe";
 import { TracksService } from "../../services/tracks.service";
 import { LoaderService } from "../../services/loader.service";
 import { UtilsService } from "../../services/utils.service";
+import { TrackActions } from "../../models/track.model";
 
 @Component({
     selector: 'my-home',
@@ -16,11 +17,12 @@ import { UtilsService } from "../../services/utils.service";
 })
 export class HomeComponent {
 
-    actionGuide = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
-    actionDub = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
-    actionResult = new EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>();
+    actionGuide = new EventEmitter<TrackActions>();
+    actionDub = new EventEmitter<TrackActions>();
+    actionOutput = new EventEmitter<TrackActions>();
+    redraw: EventEmitter<void> = new EventEmitter<void>();
 
-    setResult = new EventEmitter<File>();
+    setOutput = new EventEmitter<File>();
 
     globalVolume = 100;
 
@@ -32,10 +34,11 @@ export class HomeComponent {
 
     tracksData: {
         guide?: { file: File, sampleRate: number },
-        dub?: { file: File, sampleRate: number }
+        dub?: { file: File, sampleRate: number },
+        output?: { file: File, sampleRate: number }
     } = {};
 
-    lastTrack?: 'guide' | 'dub' | 'result';
+    lastTrack?: 'guide' | 'dub' | 'output';
 
     constructor(private _tracksService: TracksService, private _loaderService: LoaderService, private _utilsService: UtilsService) {}
 
@@ -46,13 +49,13 @@ export class HomeComponent {
         if (event.key === ' ') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('toggle');
+                    this.actionGuide.emit(TrackActions.TOGGLE);
                     break;
                 case 'dub':
-                    this.actionDub.emit('toggle');
+                    this.actionDub.emit(TrackActions.TOGGLE);
                     break;
-                case 'result':
-                    this.actionResult.emit('toggle');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.TOGGLE);
                     break;
             }
         }
@@ -64,19 +67,19 @@ export class HomeComponent {
             this.lastTrack = 'dub';
         }
         if (event.key === '3') {
-            this.lastTrack = 'result';
+            this.lastTrack = 'output';
         }
 
         if (event.key === 's') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('stop');
+                    this.actionGuide.emit(TrackActions.STOP);
                     break;
                 case 'dub':
-                    this.actionDub.emit('stop');
+                    this.actionDub.emit(TrackActions.STOP);
                     break;
-                case 'result':
-                    this.actionResult.emit('stop');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.STOP);
                     break;
             }
         }
@@ -84,13 +87,13 @@ export class HomeComponent {
         if (event.key === 'm') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('mute');
+                    this.actionGuide.emit(TrackActions.MUTE);
                     break;
                 case 'dub':
-                    this.actionDub.emit('mute');
+                    this.actionDub.emit(TrackActions.MUTE);
                     break;
-                case 'result':
-                    this.actionResult.emit('mute');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.MUTE);
                     break;
             }
         }
@@ -98,13 +101,13 @@ export class HomeComponent {
         if (event.key === 'd') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('action');
+                    this.actionGuide.emit(TrackActions.ACTION);
                     break;
                 case 'dub':
-                    this.actionDub.emit('action');
+                    this.actionDub.emit(TrackActions.ACTION);
                     break;
-                case 'result':
-                    this.actionResult.emit('action');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.ACTION);
                     break;
             }
         }
@@ -112,13 +115,13 @@ export class HomeComponent {
         if (event.key === 'ArrowRight') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('skip');
+                    this.actionGuide.emit(TrackActions.SKIP);
                     break;
                 case 'dub':
-                    this.actionDub.emit('skip');
+                    this.actionDub.emit(TrackActions.SKIP);
                     break;
-                case 'result':
-                    this.actionResult.emit('skip');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.SKIP);
                     break;
             }
         }
@@ -126,13 +129,27 @@ export class HomeComponent {
         if (event.key === 'ArrowLeft') {
             switch(this.lastTrack) {
                 case 'guide':
-                    this.actionGuide.emit('rewind');
+                    this.actionGuide.emit(TrackActions.REWIND);
                     break;
                 case 'dub':
-                    this.actionDub.emit('rewind');
+                    this.actionDub.emit(TrackActions.REWIND);
                     break;
-                case 'result':
-                    this.actionResult.emit('rewind');
+                case 'output':
+                    this.actionOutput.emit(TrackActions.REWIND);
+                    break;
+            }
+        }
+
+        if (event.key === 't') {
+            switch(this.lastTrack) {
+                case 'guide':
+                    this.actionGuide.emit(TrackActions.TEST);
+                    break;
+                case 'dub':
+                    this.actionDub.emit(TrackActions.OFF);
+                    break;
+                case 'output':
+                    this.actionOutput.emit(TrackActions.TEST);
                     break;
             }
         }
@@ -140,6 +157,10 @@ export class HomeComponent {
 
     canGenerate() {
         return !!this.tracksData.guide && !!this.tracksData.dub;
+    }
+
+    canTest() {
+        return !!this.tracksData.guide && !!this.tracksData.output;
     }
 
     generateTrack() {
@@ -153,19 +174,33 @@ export class HomeComponent {
         const sampleRates = { guide: this.tracksData.guide!.sampleRate, dub: this.tracksData.dub!.sampleRate };
 
         this._tracksService.sendTracks(body, sampleRates).subscribe({
-            next: (result) => {
+            next: (res) => {
                 this._loaderService.hide();
 
-                const file = this._utilsService.fileDataToFile(result.fileData);
+                const file = this._utilsService.fileDataToFile(res.fileData);
 
-                this.setResult.emit(file);
-                
-                this.lastTrack = 'result';
+                this.setOutput.emit(file);
+
+                this.lastTrack = 'output';
             },
             error: (err) => {
                 this._loaderService.hide();
             }
         });
+    }
+
+    testTracks() {
+        if (!this.canTest()) {
+            return;
+        }
+
+        this.actionGuide.emit(TrackActions.TEST);
+        this.actionDub.emit(TrackActions.OFF);
+        this.actionOutput.emit(TrackActions.TEST);
+    }
+
+    resizeTracks() {
+        this.redraw.emit();
     }
 
     private _getDefaultForm() {
@@ -182,7 +217,7 @@ export class HomeComponent {
         localStorage.setItem('formValue', JSON.stringify(this.form.value));
     }
 
-    saveTrackData(track: 'guide' | 'dub', data: { file: File, sampleRate: number }) {
+    saveTrackData(track: 'guide' | 'dub' | 'output', data: { file: File, sampleRate: number }) {
         this.tracksData[track] = { file: data.file, sampleRate: data.sampleRate };
         this.lastTrack = track;
     }
@@ -193,21 +228,21 @@ export class HomeComponent {
         }
     }
 
-    played(track: 'guide' | 'dub' | 'result') {
+    played(track: 'guide' | 'dub' | 'output') {
         this.lastTrack = track;
 
         switch (track) {
             case 'guide':
-                this.actionDub.emit('off');
-                this.actionResult.emit('off');
+                this.actionDub.emit(TrackActions.OFF);
+                this.actionOutput.emit(TrackActions.OFF);
                 break;
             case 'dub':
-                this.actionGuide.emit('off');
-                this.actionResult.emit('off');
+                this.actionGuide.emit(TrackActions.OFF);
+                this.actionOutput.emit(TrackActions.OFF);
                 break;
-            case 'result':
-                this.actionGuide.emit('off');
-                this.actionDub.emit('off');
+            case 'output':
+                this.actionGuide.emit(TrackActions.OFF);
+                this.actionDub.emit(TrackActions.OFF);
                 break;
         }
     }

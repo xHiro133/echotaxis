@@ -1,6 +1,8 @@
 {
     "home": {
         "globalVolume": "Volume globale",
-        "generate": "Genera nuova traccia"
+        "resize": "Ridimensiona tracce",
+        "generate": "Genera nuova traccia",
+        "test": "Testa la traccia generata"
     }
 }

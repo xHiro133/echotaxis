@@ -2,12 +2,12 @@
 
 // Variables will be overwritten by themes.service.ts
 :root {
-    --primary: #2b0457;
-    --secondary: #3b3048;
-    --accent: #5409a9;
-    --accentLight: #8d42e3;
-    --light: #9a48f8;
-    --dark: #0b090d;
+    --primary: #775e88;
+    --secondary: #221932;
+    --accent: #722548;
+    --accent-dark: #34091e;
+    --light: #988289;
+    --dark: #060407;
 
     --white: #e7e7e7;
     --black: #111;
@@ -59,7 +59,8 @@ html, body {
     color: var(--white);
     background-size: cover;
     font-family: "Cascadia Mono", sans-serif;
-    font-optical-sizing: auto;;
+    font-optical-sizing: auto;
+    height: 100vh;
 }
 
 button {
@@ -74,8 +75,8 @@ button {
     font-weight: bold;
 
     &:hover, &[disabled] {
-        background-color: var(--primary);
-        border: 2px solid var(--primary);
+        background-color: var(--accent-dark);
+        border: 2px solid var(--accent-dark);
     }
 
     &[disabled] {

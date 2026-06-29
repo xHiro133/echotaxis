@@ -3,16 +3,16 @@
         "primary": "#2d5128",
         "secondary": "#d5eb7b",
         "accent": "#8da750",
-        "accentLight": "#f2eeca",
+        "accent-dark": "#f2eeca",
         "light": "#e4eb9c",
         "dark": "#142c14"
     },
     "dark": {
-        "primary": "#2b0457",
-        "secondary": "#3b3048",
-        "accent": "#5409a9",
-        "accentLight": "#8d42e3",
-        "light": "#9a48f8",
-        "dark": "#0b090d"
+        "primary": "#775e88",
+        "secondary": "#221932",
+        "accent": "#722548",
+        "accent-dark": "#34091e",
+        "light": "#988289",
+        "dark": "#060407"
     }
 }

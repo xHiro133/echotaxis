@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { SliderComponent } from "../slider/slider.component";
+import { TrackActions } from "../../models/track.model";
 
 @Component({
     selector: 'my-track',
@@ -19,10 +20,12 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
 
     @Input() color: 'blue' | 'yellow' | 'green' = 'blue';
-    @Input() setPlayer?: EventEmitter<'toggle' | 'on' | 'off' | 'stop' | 'mute' | 'action' | 'skip' | 'rewind'>;
+    @Input() setPlayer?: EventEmitter<TrackActions>;
     @Input() readonly = false;
     @Input() inputVolume = 100;
     @Input() fileInput?: EventEmitter<File>;
+    @Input() active?: boolean;
+    @Input() redraw?: EventEmitter<void>;
 
     trackWidth?: number;
     trackHeight?: number;
@@ -48,6 +51,15 @@ export class TrackComponent implements AfterViewInit, OnChanges {
 
     ngAfterViewInit(): void {
         this._setupCanvas();
+
+        this.redraw?.subscribe(() => {
+            // For some reasons doing it once often fails
+            this._redrawCanvas();
+            this._redrawCanvas();
+            this._redrawCanvas();
+            this._redrawCanvas();
+            this._redrawCanvas();
+        });
 
         (this.audioFile?.nativeElement as HTMLInputElement)?.addEventListener('change', async (event) => {
             const file = (event.target as HTMLInputElement)?.files?.[0];
@@ -82,37 +94,41 @@ export class TrackComponent implements AfterViewInit, OnChanges {
             }
 
             switch(action) {
-                case 'off':
+                case TrackActions.OFF:
                     this.audio.pause();
                     break;
-                case 'on':
+                case TrackActions.ON:
                     if (this.audio.currentTime >= this.audio.duration) {
                         this.audio.currentTime = 0;
                     }
 
                     this.audio.play();
                     break;
-                case 'toggle':
+                case TrackActions.TOGGLE:
                     this.toggleAudio();
                     break;
-                case 'stop':
+                case TrackActions.STOP:
                     this.stopAudio();
                     break;
-                case 'mute':
+                case TrackActions.MUTE:
                     this.toggleMute();
                     break;
-                case 'action':
+                case TrackActions.ACTION:
                     if (this.readonly) {
                         this.downloadFile();
                     } else {
                         this.deleteFile();
                     }
                     break;
-                case 'skip':
+                case TrackActions.SKIP:
                     this.skipTrack();
                     break;
-                case 'rewind':
+                case TrackActions.REWIND:
                     this.rewindTrack();
+                    break;
+                case TrackActions.TEST:
+                    this.stopAudio();
+                    this.audio.play();
                     break;
             }
         });
@@ -231,6 +247,10 @@ export class TrackComponent implements AfterViewInit, OnChanges {
 
     @HostListener('window:resize', [])
     onResize() {
+        this._redrawCanvas();
+    }
+
+    private _redrawCanvas() {
         this._setupCanvas();
         this._drawCanvas();
     }

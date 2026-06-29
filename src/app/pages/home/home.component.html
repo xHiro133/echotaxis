@@ -1,14 +1,23 @@
-<div class="track">
-    <my-track [color]="'blue'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)"></my-track>
-</div>
-<div class="track">
-    <my-track [color]="'yellow'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionDub" (audioPlayed)="played('dub')" (fileSelected)="saveTrackData('dub', $event)"></my-track>
-</div>
-<div class="track">
-    <my-track [color]="'green'" [inputVolume]="globalVolume" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionResult" (audioPlayed)="played('result')" [readonly]="true" [fileInput]="setResult"></my-track>
-</div>
-
-<div class="manager">
-    <my-form [form]="form" [inline]="true" (formChanged)="setDefaultForm()"></my-form>
-    <button [disabled]="!canGenerate()" (click)="generateTrack()">{{ 'home.generate' | translate }}</button>
+<div class="main">
+    <div class="tracks">
+        <div class="track">
+            <!-- <div class="dot" [class.blue]="lastTrack === 'guide'"></div> -->
+            <my-track [color]="'blue'" [active]="lastTrack === 'guide'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionGuide" (audioPlayed)="played('guide')" (fileSelected)="saveTrackData('guide', $event)"></my-track>
+        </div>
+        <div class="track">
+            <!-- <div class="dot" [class.yellow]="lastTrack === 'dub'"></div> -->
+            <my-track [color]="'yellow'" [active]="lastTrack === 'dub'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionDub" (audioPlayed)="played('dub')" (fileSelected)="saveTrackData('dub', $event)"></my-track>
+        </div>
+        <div class="track">
+            <!-- <div class="dot" [class.green]="lastTrack === 'output'"></div> -->
+            <my-track [color]="'green'" [active]="lastTrack === 'output'" [inputVolume]="globalVolume" [redraw]="redraw" (volumeChanged)="setGlobalVolume($event)" [setPlayer]="actionOutput" (audioPlayed)="played('output')" (fileSelected)="saveTrackData('output', $event)" [readonly]="true" [fileInput]="setOutput"></my-track>
+        </div>
+    </div>
+    
+    <div class="manager">
+        <my-form [form]="form" [inline]="true" (formChanged)="setDefaultForm()"></my-form>
+        <button (click)="resizeTracks()">{{ 'home.resize' | translate }}</button>
+        <button [disabled]="!canGenerate()" (click)="generateTrack()">{{ 'home.generate' | translate }}</button>
+        <button [disabled]="!canTest()" (click)="testTracks()">{{ 'home.test' | translate }}</button>
+    </div>
 </div>

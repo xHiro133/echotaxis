@@ -1,5 +1,7 @@
 <div class="track-holder">
     <div [class]="'player ' + (readonly ? 'readonly ' : '') + color">
+        <div class="dot" [class.show]="active"></div>
+
         @if (readonly) {
             @if (currentFile) {
                 <div class="actions">
