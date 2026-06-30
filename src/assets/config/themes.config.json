@@ -5,7 +5,8 @@
         "accent": "#8da750",
         "accent-dark": "#f2eeca",
         "light": "#e4eb9c",
-        "dark": "#142c14"
+        "dark": "#142c14",
+        "background": "#e4eb9c"
     },
     "dark": {
         "primary": "#775e88",
@@ -13,6 +14,7 @@
         "accent": "#722548",
         "accent-dark": "#34091e",
         "light": "#988289",
-        "dark": "#060407"
+        "dark": "#060407",
+        "background": "#060407"
     }
 }

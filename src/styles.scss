@@ -8,6 +8,7 @@
     --accent-dark: #34091e;
     --light: #988289;
     --dark: #060407;
+    --background: #060407;
 
     --white: #e7e7e7;
     --black: #111;
@@ -44,7 +45,7 @@
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--dark);
+    background: var(--background);
 }
 
 * {
@@ -55,12 +56,13 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: var(--dark);
+    background-color: var(--background);
     color: var(--white);
     background-size: cover;
     font-family: "Cascadia Mono", sans-serif;
     font-optical-sizing: auto;
     height: 100vh;
+    overflow-x: hidden;
 }
 
 button {

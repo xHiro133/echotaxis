@@ -1,6 +1,6 @@
 <div class="track-holder">
     <div [class]="'player ' + (readonly ? 'readonly ' : '') + color">
-        <div class="dot" [class.show]="active"></div>
+        <div class="dot"><div [class.show]="active"></div></div>
 
         @if (readonly) {
             @if (currentFile) {

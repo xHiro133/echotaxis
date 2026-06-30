@@ -47,4 +47,18 @@ export class UtilsService {
         return new File([blob], fileData.name, { type: fileData.type });
     }
 
+    float32ToBase64(float32: Float32Array): string {
+        const bytes = new Uint8Array(float32.buffer, float32.byteOffset, float32.byteLength);
+
+        let binary = "";
+
+        const len = bytes.length;
+
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+
+        return btoa(binary);
+    }
+
 }

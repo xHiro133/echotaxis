@@ -42,6 +42,8 @@ export class HomeComponent {
 
     sizeForResult?: { blockSize: number; fileSize: number };
 
+    showMenu = false;
+
     constructor(private _tracksService: TracksService, private _loaderService: LoaderService, private _utilsService: UtilsService) {}
 
     @HostListener('window:keydown', ['$event'])
