@@ -40,8 +40,6 @@ export class HomeComponent {
 
     lastTrack?: 'guide' | 'dub' | 'output';
 
-    sizeForResult?: { blockSize: number; fileSize: number };
-
     showMenu = false;
 
     constructor(private _tracksService: TracksService, private _loaderService: LoaderService, private _utilsService: UtilsService) {}
@@ -159,10 +157,6 @@ export class HomeComponent {
         }
     }
 
-    setSizeForResult(sizes: { blockSize: number; fileSize: number }) {
-        this.sizeForResult = sizes;
-    }
-
     canGenerate() {
         return !!this.tracksData.guide && !!this.tracksData.dub;
     }
@@ -190,6 +184,7 @@ export class HomeComponent {
                 this.setOutput.emit(file);
 
                 this.lastTrack = 'output';
+                this.showMenu = false;
             },
             error: (err) => {
                 this._loaderService.hide();

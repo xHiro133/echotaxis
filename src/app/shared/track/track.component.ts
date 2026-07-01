@@ -19,7 +19,6 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Output() fileSelected: EventEmitter<{ file: File, sampleRate: number }> = new EventEmitter();
     @Output() audioPlayed: EventEmitter<void> = new EventEmitter();
     @Output() volumeChanged: EventEmitter<number> = new EventEmitter();
-    @Output() sizesCalculated: EventEmitter<{ blockSize: number; fileSize: number }> = new EventEmitter();
 
     @Input() color: 'blue' | 'yellow' | 'green' = 'blue';
     @Input() setPlayer?: EventEmitter<TrackActions>;
@@ -28,7 +27,6 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     @Input() fileInput?: EventEmitter<File>;
     @Input() active?: boolean;
     @Input() redraw?: EventEmitter<void>;
-    @Input() enforcedSize?: { blockSize: number; fileSize: number };
 
     trackWidth?: number;
     trackHeight?: number;
@@ -96,13 +94,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
     private async _manageFile(file: File) {
         this.currentFile = file;
 
-        const fileCopy = file;
-        const fileSize = this.enforcedSize?.fileSize;
-
-        const cutBlob = fileCopy.slice(0, fileSize);
-        const fileToPlay = new File([cutBlob], fileCopy.name, { type: fileCopy.type });
-
-        const url = URL.createObjectURL(fileSize ? fileToPlay : file);
+        const url = URL.createObjectURL(file);
         this.audio.src = url;
 
         this.audio.volume = this.inputVolume / 100;
@@ -380,9 +372,7 @@ export class TrackComponent implements AfterViewInit, OnChanges {
         }
 
         const result = [];
-        const blockSize = this.enforcedSize?.blockSize || (channelData?.length || 1) / (targetSize || 1);
-
-        this.sizesCalculated.emit({ blockSize, fileSize: this.currentFile?.size || 0 });
+        const blockSize = (channelData?.length || 1) / (targetSize || 1);
 
         for (let i = 0; i < (targetSize || 0); i++) {
             const start = Math.floor(i * blockSize);
